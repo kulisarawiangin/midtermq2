@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  # Video Streaming Backend Apps (3 replicas)
+  video-streaming1:
+    image: video-streaming
+    container_name: video-streaming1
+    environment:
+      - PORT=3001
+    networks:
+      - app_network
+
+  video-streaming2:
+    image: video-streaming
+    container_name: video-streaming2
+    environment:
+      - PORT=3002
+    networks:
+      - app_network
+
+  video-streaming3:
+    image: video-streaming
+    container_name: video-streaming3
+    environment:
+      - PORT=3003
+    networks:
+      - app_network
+
+  # NGINX Reverse Proxy & Load Balancer
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /Users/kulisarawiangin/Documents/midtermq2/ssl/self-signed.crt:/etc/nginx/ssl/self-signed.crt:ro
+      - /Users/kulisarawiangin/Documents/midtermq2/ssl/self-signed.key:/etc/nginx/ssl/self-signed.key:ro
+    depends_on:
+      - video-streaming1
+      - video-streaming2
+      - video-streaming3
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
